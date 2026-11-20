@@ -1,0 +1,292 @@
+date,country,holiday_name
+2024-01-26,IN,Republic Day
+2024-03-25,IN,Holi
+2024-03-29,IN,Good Friday
+2024-04-11,IN,Eid al-Fitr
+2024-04-14,IN,Dr. B. R. Ambedkar's Birthday
+2024-04-17,IN,Ram Navami
+2024-04-21,IN,Mahavira's Birthday
+2024-05-23,IN,Buddha Purnima
+2024-06-17,IN,Eid al-Adha
+2024-07-17,IN,Ashura
+2024-08-15,IN,Independence Day
+2024-08-26,IN,Janmashtami (Vaishnava)
+2024-09-16,IN,Prophet's Birthday
+2024-10-02,IN,Mahatma Gandhi's Birthday
+2024-10-12,IN,Dussehra
+2024-10-31,IN,Diwali
+2024-11-15,IN,Guru Nanak's Birthday
+2024-12-25,IN,Christmas
+2025-01-26,IN,Republic Day
+2025-02-26,IN,Maha Shivaratri
+2025-03-14,IN,Holi
+2025-03-31,IN,Eid al-Fitr
+2025-04-10,IN,Mahavira's Birthday
+2025-04-14,IN,Dr. B. R. Ambedkar's Birthday
+2025-04-18,IN,Good Friday
+2025-05-12,IN,Buddha Purnima
+2025-06-07,IN,Eid al-Adha
+2025-07-06,IN,Ashura
+2025-08-15,IN,Independence Day
+2025-08-16,IN,Janmashtami (Vaishnava)
+2025-09-05,IN,Prophet's Birthday
+2025-10-02,IN,Dussehra; Mahatma Gandhi's Birthday
+2025-10-20,IN,Diwali
+2025-11-05,IN,Guru Nanak's Birthday
+2025-12-25,IN,Christmas
+2024-01-01,US,New Year's Day
+2024-01-15,US,Martin Luther King Jr. Day
+2024-02-19,US,Washington's Birthday
+2024-05-27,US,Memorial Day
+2024-06-19,US,Juneteenth National Independence Day
+2024-07-04,US,Independence Day
+2024-09-02,US,Labor Day
+2024-10-14,US,Columbus Day
+2024-11-11,US,Veterans Day
+2024-11-28,US,Thanksgiving Day
+2024-12-25,US,Christmas Day
+2025-01-01,US,New Year's Day
+2025-01-20,US,Martin Luther King Jr. Day
+2025-02-17,US,Washington's Birthday
+2025-05-26,US,Memorial Day
+2025-06-19,US,Juneteenth National Independence Day
+2025-07-04,US,Independence Day
+2025-09-01,US,Labor Day
+2025-10-13,US,Columbus Day
+2025-11-11,US,Veterans Day
+2025-11-27,US,Thanksgiving Day
+2025-12-25,US,Christmas Day
+2024-01-01,UK,New Year's Day
+2024-03-29,UK,Good Friday
+2024-05-06,UK,May Day
+2024-05-27,UK,Spring Bank Holiday
+2024-12-25,UK,Christmas Day
+2024-12-26,UK,Boxing Day
+2025-01-01,UK,New Year's Day
+2025-04-18,UK,Good Friday
+2025-05-05,UK,May Day
+2025-05-26,UK,Spring Bank Holiday
+2025-12-25,UK,Christmas Day
+2025-12-26,UK,Boxing Day
+2024-01-01,AE,New Year's Day
+2024-04-08,AE,Eid al-Fitr Holiday
+2024-04-09,AE,Eid al-Fitr Holiday
+2024-04-10,AE,Eid al-Fitr
+2024-04-11,AE,Eid al-Fitr Holiday
+2024-04-12,AE,Eid al-Fitr Holiday
+2024-06-15,AE,Day of Arafah
+2024-06-16,AE,Eid al-Adha
+2024-06-17,AE,Eid al-Adha Holiday
+2024-06-18,AE,Eid al-Adha Holiday
+2024-07-07,AE,Islamic New Year
+2024-09-15,AE,Prophet's Birthday
+2024-12-02,AE,National Day
+2024-12-03,AE,National Day
+2025-01-01,AE,New Year's Day
+2025-03-30,AE,Eid al-Fitr
+2025-03-31,AE,Eid al-Fitr Holiday
+2025-04-01,AE,Eid al-Fitr Holiday
+2025-06-05,AE,Day of Arafah
+2025-06-06,AE,Eid al-Adha
+2025-06-07,AE,Eid al-Adha Holiday
+2025-06-08,AE,Eid al-Adha Holiday
+2025-06-27,AE,Islamic New Year
+2025-09-05,AE,Prophet's Birthday
+2025-12-01,AE,National Day
+2025-12-02,AE,National Day
+2024-01-01,SG,New Year's Day
+2024-02-10,SG,Chinese New Year
+2024-02-11,SG,Chinese New Year
+2024-02-12,SG,Chinese New Year (observed)
+2024-03-29,SG,Good Friday
+2024-04-10,SG,Eid al-Fitr
+2024-05-01,SG,Labor Day
+2024-05-22,SG,Vesak Day
+2024-06-17,SG,Eid al-Adha
+2024-08-09,SG,National Day
+2024-10-31,SG,Diwali
+2024-12-25,SG,Christmas Day
+2025-01-01,SG,New Year's Day
+2025-01-29,SG,Chinese New Year
+2025-01-30,SG,Chinese New Year
+2025-03-31,SG,Eid al-Fitr
+2025-04-18,SG,Good Friday
+2025-05-01,SG,Labor Day
+2025-05-03,SG,Polling Day
+2025-05-12,SG,Vesak Day
+2025-06-07,SG,Eid al-Adha
+2025-08-09,SG,National Day
+2025-10-20,SG,Diwali
+2025-12-25,SG,Christmas Day
+2024-01-01,DE,New Year's Day
+2024-03-29,DE,Good Friday
+2024-04-01,DE,Easter Monday
+2024-05-01,DE,Labor Day
+2024-05-09,DE,Ascension Day
+2024-05-20,DE,Pentecost Monday
+2024-10-03,DE,German Unity Day
+2024-12-25,DE,Christmas Day
+2024-12-26,DE,Second Day of Christmas
+2025-01-01,DE,New Year's Day
+2025-04-18,DE,Good Friday
+2025-04-21,DE,Easter Monday
+2025-05-01,DE,Labor Day
+2025-05-29,DE,Ascension Day
+2025-06-09,DE,Pentecost Monday
+2025-10-03,DE,German Unity Day
+2025-12-25,DE,Christmas Day
+2025-12-26,DE,Second Day of Christmas
+2024-01-01,AU,New Year's Day
+2024-01-26,AU,Australia Day
+2024-03-29,AU,Good Friday
+2024-04-01,AU,Easter Monday
+2024-04-25,AU,ANZAC Day
+2024-12-25,AU,Christmas Day
+2024-12-26,AU,Boxing Day
+2025-01-01,AU,New Year's Day
+2025-01-26,AU,Australia Day
+2025-04-18,AU,Good Friday
+2025-04-21,AU,Easter Monday
+2025-04-25,AU,ANZAC Day
+2025-12-25,AU,Christmas Day
+2025-12-26,AU,Boxing Day
+2024-01-01,JP,New Year's Day
+2024-01-08,JP,Coming of Age Day
+2024-02-11,JP,Foundation Day
+2024-02-12,JP,Substitute Holiday
+2024-02-23,JP,Emperor's Birthday
+2024-03-20,JP,Vernal Equinox Day
+2024-04-29,JP,Showa Day
+2024-05-03,JP,Constitution Day
+2024-05-04,JP,Greenery Day
+2024-05-05,JP,Children's Day
+2024-05-06,JP,Substitute Holiday
+2024-07-15,JP,Marine Day
+2024-08-11,JP,Mountain Day
+2024-08-12,JP,Substitute Holiday
+2024-09-16,JP,Respect for the Aged Day
+2024-09-22,JP,Autumnal Equinox Day
+2024-09-23,JP,Substitute Holiday
+2024-10-14,JP,Sports Day
+2024-11-03,JP,Culture Day
+2024-11-04,JP,Substitute Holiday
+2024-11-23,JP,Labor Thanksgiving Day
+2025-01-01,JP,New Year's Day
+2025-01-13,JP,Coming of Age Day
+2025-02-11,JP,Foundation Day
+2025-02-23,JP,Emperor's Birthday
+2025-02-24,JP,Substitute Holiday
+2025-03-20,JP,Vernal Equinox Day
+2025-04-29,JP,Showa Day
+2025-05-03,JP,Constitution Day
+2025-05-04,JP,Greenery Day
+2025-05-05,JP,Children's Day
+2025-05-06,JP,Substitute Holiday
+2025-07-21,JP,Marine Day
+2025-08-11,JP,Mountain Day
+2025-09-15,JP,Respect for the Aged Day
+2025-09-23,JP,Autumnal Equinox Day
+2025-10-13,JP,Sports Day
+2025-11-03,JP,Culture Day
+2025-11-23,JP,Labor Thanksgiving Day
+2025-11-24,JP,Substitute Holiday
+2024-01-01,CN,New Year's Day
+2024-02-10,CN,Chinese New Year (Spring Festival)
+2024-02-11,CN,Chinese New Year (Spring Festival)
+2024-02-12,CN,Chinese New Year (Spring Festival)
+2024-02-13,CN,Chinese New Year (Spring Festival) (observed)
+2024-02-14,CN,Chinese New Year (Spring Festival) (observed)
+2024-02-15,CN,Day off (substituted from 02/04/2024)
+2024-02-16,CN,Day off (substituted from 02/18/2024)
+2024-04-04,CN,Tomb-Sweeping Day
+2024-04-05,CN,Day off (substituted from 04/07/2024)
+2024-05-01,CN,Labor Day
+2024-05-02,CN,Day off (substituted from 04/28/2024)
+2024-05-03,CN,Day off (substituted from 05/11/2024)
+2024-06-10,CN,Dragon Boat Festival
+2024-09-16,CN,Day off (substituted from 09/14/2024)
+2024-09-17,CN,Mid-Autumn Festival
+2024-10-01,CN,National Day
+2024-10-02,CN,National Day
+2024-10-03,CN,National Day
+2024-10-04,CN,Day off (substituted from 09/29/2024)
+2024-10-07,CN,Day off (substituted from 10/12/2024)
+2025-01-01,CN,New Year's Day
+2025-01-28,CN,Chinese New Year's Eve
+2025-01-29,CN,Chinese New Year (Spring Festival)
+2025-01-30,CN,Chinese New Year (Spring Festival)
+2025-01-31,CN,Chinese New Year (Spring Festival)
+2025-02-03,CN,Day off (substituted from 01/26/2025)
+2025-02-04,CN,Day off (substituted from 02/08/2025)
+2025-04-04,CN,Tomb-Sweeping Day
+2025-05-01,CN,Labor Day
+2025-05-02,CN,Labor Day
+2025-05-05,CN,Day off (substituted from 04/27/2025)
+2025-05-31,CN,Dragon Boat Festival
+2025-06-02,CN,Dragon Boat Festival (observed)
+2025-10-01,CN,National Day
+2025-10-02,CN,National Day
+2025-10-03,CN,National Day
+2025-10-06,CN,Mid-Autumn Festival
+2025-10-07,CN,Day off (substituted from 09/28/2025)
+2025-10-08,CN,Day off (substituted from 10/11/2025)
+2024-01-01,FR,New Year's Day
+2024-04-01,FR,Easter Monday
+2024-05-01,FR,Labor Day
+2024-05-08,FR,Victory Day
+2024-05-09,FR,Ascension Day
+2024-05-20,FR,Pentecost Monday
+2024-07-14,FR,National Day
+2024-08-15,FR,Assumption Day
+2024-11-01,FR,All Saints' Day
+2024-11-11,FR,Armistice Day
+2024-12-25,FR,Christmas Day
+2025-01-01,FR,New Year's Day
+2025-04-21,FR,Easter Monday
+2025-05-01,FR,Labor Day
+2025-05-08,FR,Victory Day
+2025-05-29,FR,Ascension Day
+2025-06-09,FR,Pentecost Monday
+2025-07-14,FR,National Day
+2025-08-15,FR,Assumption Day
+2025-11-01,FR,All Saints' Day
+2025-11-11,FR,Armistice Day
+2025-12-25,FR,Christmas Day
+2024-01-01,KR,New Year's Day
+2024-02-09,KR,The day preceding Korean New Year
+2024-02-10,KR,Korean New Year
+2024-02-11,KR,The second day of Korean New Year
+2024-02-12,KR,Alternative holiday for Korean New Year
+2024-03-01,KR,Independence Movement Day
+2024-04-10,KR,National Assembly Election Day
+2024-05-05,KR,Children's Day
+2024-05-06,KR,Alternative holiday for Children's Day
+2024-05-15,KR,Buddha's Birthday
+2024-06-06,KR,Memorial Day
+2024-08-15,KR,Liberation Day
+2024-09-16,KR,The day preceding Chuseok
+2024-09-17,KR,Chuseok
+2024-09-18,KR,The second day of Chuseok
+2024-10-01,KR,Armed Forces Day
+2024-10-03,KR,National Foundation Day
+2024-10-09,KR,Hangul Day
+2024-12-25,KR,Christmas Day
+2025-01-01,KR,New Year's Day
+2025-01-27,KR,Temporary Public Holiday
+2025-01-28,KR,The day preceding Korean New Year
+2025-01-29,KR,Korean New Year
+2025-01-30,KR,The second day of Korean New Year
+2025-03-01,KR,Independence Movement Day
+2025-03-03,KR,Alternative holiday for Independence Movement Day
+2025-05-05,KR,Buddha's Birthday; Children's Day
+2025-05-06,KR,Alternative holiday for Buddha's Birthday; Alternative holiday for Children's Day
+2025-06-03,KR,Presidential Election Day
+2025-06-06,KR,Memorial Day
+2025-08-15,KR,Liberation Day
+2025-10-03,KR,National Foundation Day
+2025-10-05,KR,The day preceding Chuseok
+2025-10-06,KR,Chuseok
+2025-10-07,KR,The second day of Chuseok
+2025-10-08,KR,Alternative holiday for Chuseok
+2025-10-09,KR,Hangul Day
+2025-12-25,KR,Christmas Day
