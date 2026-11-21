@@ -14,16 +14,31 @@ from functools import lru_cache
 
 from google.genai import types
 
-from agent.loop import MODEL, audit, client
+from agent.loop import audit, generate
 from agent.tools import get_forecast, get_nationality_surge
 from database import LOCATIONS, TODAY
 from forecast import HORIZON_DAYS
 from nationality import profiles
 
-PROMPT = """Write a morning operations briefing (under 220 words) for a transit operations manager.
-Use exactly three sections: "Top 3 unusual", "Today's visitor mix", "Recommended actions".
-Use only numbers that appear in the FACTS, copied exactly (you may add thousands separators).
-Do not add any other numbers, estimates or percentages. Say once that the data is synthetic.
+PROMPT = """You are writing the morning operations briefing a transit operations manager reads before the
+daily stand-up. Write plain, natural English for people, not a data dump.
+
+Format (under 200 words, no title line):
+- One short opening paragraph: what today looks like and which day this week needs the most attention.
+- A heading "What stands out", then 2 or 3 bullets, each one sentence about one location and day,
+  saying how it compares with the same day last week and why (for example a holiday).
+- A heading "What to prepare", then at most 4 bullets, one per day, merging visitor groups on the
+  same day into one sentence and naming the services to prepare.
+- A final one-line sentence noting the data is synthetic.
+
+Rules:
+- Rider numbers for today and later are forecasts: write "is expected to see", "will see", never
+  past tense. Only "same day last week" numbers happened already.
+- Never copy field names (such as "change_vs_last_week_pct" or "total riders") into the text.
+- Write dates as weekday and day, for example "Thursday 25 December", never as 2025-12-25.
+- Use only numbers that appear in the FACTS, copied exactly (thousands separators are fine).
+  Round nothing, and add no other numbers, estimates or percentages.
+- Do not use markdown bold or tables.
 
 FACTS:
 """
@@ -68,7 +83,7 @@ def group_surges(surge_list: list[dict]) -> list[dict]:
         out.append({
             "date": day, "weekday": members[0]["weekday"], "region": region, "countries": countries,
             "locations": locations, "ratio_min": low, "ratio_max": high,
-            "expected_riders": expected, "extra_riders": extra, "holiday": holiday,
+            "expected_riders": expected, "extra_riders": extra, "holiday": holiday, "services": services,
             "recommendation": (f"{members[0]['weekday']} {day}, {where}: {who} {ratio} normal, "
                                f"about {expected:,} riders ({holiday}). Recommend: {services}."),
         })
@@ -132,10 +147,8 @@ def get_briefing() -> dict:
     facts = build_facts()
     text, source, note = template(facts), "template", None
     try:
-        draft = client().models.generate_content(
-            model=MODEL, contents=PROMPT + json.dumps(facts, indent=1),
-            config=types.GenerateContentConfig(temperature=0.2),
-        ).text or ""
+        _, response = generate(PROMPT + json.dumps(facts, indent=1), types.GenerateContentConfig(temperature=0.2))
+        draft = response.text or ""
         bad = ungrounded_numbers(draft, facts)
         if bad:
             note = f"Gemini draft used numbers not in the facts ({', '.join(bad[:5])}); template used instead."

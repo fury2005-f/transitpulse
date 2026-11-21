@@ -113,6 +113,8 @@ def run_sql(query: str) -> dict:
       nationality_profiles(nationality TEXT, name TEXT, base_share REAL, holiday_multiplier REAL,
                            seasonal_pattern TEXT, preferred_services TEXT)
       capacity_limits(location TEXT, daily_capacity INTEGER)   max riders per day
+    timestamp is text like '2025-11-30T18:00': filter whole days or months with
+    timestamp LIKE '2025-11-%' or substr(timestamp, 1, 10), not timestamp <= '2025-11-30'.
     Locations: station_a, station_b, tourist_hub, bus_terminal.
     Nationality / country codes: IN, US, UK, AE, SG, DE, AU, JP, CN, FR, KR, OTHER.
 

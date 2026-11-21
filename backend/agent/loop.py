@@ -10,20 +10,42 @@ Every step is appended to logs/audit.jsonl.
 import json
 import os
 import threading
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 
+import httpx
 from google import genai
+from google.genai import errors as genai_errors
 from google.genai import types
 
 from agent.tools import TOOLS, call_tool
 from database import LOCATIONS, TODAY
 from forecast import HORIZON_DAYS
 
+ENV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+
+
+def _load_env_file(path: str) -> None:
+    """Read KEY=value lines from backend/.env. Real environment variables take priority."""
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            key, sep, value = line.strip().partition("=")
+            value = value.strip().strip('"').strip("'")
+            if sep and value and not key.startswith("#"):
+                os.environ.setdefault(key.strip(), value)
+
+
+_load_env_file(ENV_PATH)
 MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+# Used when the main model answers 503 "high demand" (common on the free tier).
+FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-flash-lite-latest")
 MAX_STEPS = 8
-AUDIT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs", "audit.jsonl")
+# Vercel's filesystem is read-only except /tmp.
+AUDIT_PATH = os.path.join("/tmp" if os.getenv("VERCEL") else os.path.dirname(os.path.dirname(__file__)), "logs", "audit.jsonl")
 _audit_lock = threading.Lock()
 
 SYSTEM = f"""You are TransitPulse, an operations assistant for a tourism-heavy transit network.
@@ -55,8 +77,30 @@ def audit(request_id: str, event: str, **fields) -> None:
 def client() -> genai.Client:
     key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if not key:
-        raise RuntimeError("GEMINI_API_KEY is not set. Get a free key at https://aistudio.google.com/apikey")
-    return genai.Client(api_key=key)
+        raise RuntimeError("GEMINI_API_KEY is not set. Paste your key into backend/.env and restart the backend. "
+                           "Free key: https://aistudio.google.com/apikey")
+    # Without these limits the SDK keeps retrying an overloaded model and the request appears to hang.
+    return genai.Client(
+        api_key=key,
+        http_options=types.HttpOptions(timeout=30_000, retry_options=types.HttpRetryOptions(attempts=1)),
+    )
+
+
+_skip_main_until = 0.0
+
+
+def generate(contents, config=None):
+    """Call the main model; if it is overloaded or times out, use the fallback model (and keep using it
+    for 5 minutes, so the following steps don't wait on the overloaded model again)."""
+    global _skip_main_until
+    models = [MODEL, FALLBACK_MODEL] if time.time() >= _skip_main_until else [FALLBACK_MODEL]
+    for model in dict.fromkeys(models):
+        try:
+            return model, client().models.generate_content(model=model, contents=contents, config=config)
+        except (genai_errors.ServerError, httpx.TimeoutException):
+            if model == FALLBACK_MODEL:
+                raise
+            _skip_main_until = time.time() + 300
 
 
 def ask(question: str) -> dict:
@@ -72,11 +116,11 @@ def ask(question: str) -> dict:
     sql_used, steps = [], []
 
     for _ in range(MAX_STEPS):
-        response = client().models.generate_content(model=MODEL, contents=contents, config=config)
+        model, response = generate(contents, config)
         calls = response.function_calls or []
         if not calls:
             answer = response.text or "I could not produce an answer."
-            audit(rid, "answer", answer=answer)
+            audit(rid, "answer", answer=answer, model=model)
             return {"answer": answer, "sql": sql_used, "tool_calls": steps, "request_id": rid}
 
         contents.append(response.candidates[0].content)  # keep the model's turn (incl. thought signatures)

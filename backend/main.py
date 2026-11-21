@@ -5,6 +5,7 @@ import os
 from datetime import date, timedelta
 from typing import Literal
 
+import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -91,6 +92,8 @@ def chat(req: ChatRequest):
         raise HTTPException(503, str(e))
     except genai_errors.APIError as e:
         raise HTTPException(502, f"Gemini API error: {e}")
+    except httpx.TimeoutException:
+        raise HTTPException(504, "Gemini did not respond in time. Its servers are busy; try again in a minute.")
 
 
 @app.get("/api/briefing")

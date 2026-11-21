@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --page: #f4f1ea;
+  --surface: #fbf9f4;
+  --sunken: #ebe6da;
+  --ink: #1f2a2e;
+  --ink-2: #4f5a5e;
+  --muted: #6c7578;
+  --line: #ddd6c8;
+  --accent: #1d4a57;
+  --accent-ink: #ffffff;
+  --busy: #8a5300;
+  --busy-wash: #f5e7c8;
+  --critical: #b3362e;
+  --critical-wash: #f6e1dc;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+}
+
+/* One page-load moment: the route line draws and the summary settles in. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes draw-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.reveal { animation: rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0ms); }
+.route-line { transform-origin: left center; animation: draw-x 800ms ease-out 150ms both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .route-line { animation: none; }
+}
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }

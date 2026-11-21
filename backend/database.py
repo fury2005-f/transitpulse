@@ -16,10 +16,10 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "ops.db")
 TODAY = date.fromisoformat(os.getenv("TRANSITPULSE_TODAY", "2025-12-22"))
 
 LOCATIONS = {
-    "station_a": "Station A",
-    "station_b": "Station B",
-    "tourist_hub": "Tourist Hub",
-    "bus_terminal": "Bus Terminal",
+    "station_a": "Central Station",
+    "station_b": "Riverside",
+    "tourist_hub": "Old Town",
+    "bus_terminal": "Gateway Terminal",
 }
 
 SCHEMA = """

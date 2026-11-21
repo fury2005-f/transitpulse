@@ -72,10 +72,10 @@ PROFILES = {
 #   tourism_weight:    how strongly international holiday surges raise total volume
 #   domestic_holiday:  total-volume effect of an Indian public holiday
 LOCATIONS = {
-    "station_a":    dict(name="Station A",    base=900, weekend_factor=0.6,  domestic_bias=2.5, tourism_weight=0.2, domestic_holiday=0.7),
-    "station_b":    dict(name="Station B",    base=550, weekend_factor=0.7,  domestic_bias=2.0, tourism_weight=0.3, domestic_holiday=0.75),
-    "tourist_hub":  dict(name="Tourist Hub",  base=350, weekend_factor=1.8,  domestic_bias=0.5, tourism_weight=1.0, domestic_holiday=1.8),
-    "bus_terminal": dict(name="Bus Terminal", base=500, weekend_factor=0.8,  domestic_bias=1.2, tourism_weight=0.5, domestic_holiday=1.3),
+    "station_a":    dict(name="Central Station",base=900, weekend_factor=0.6,  domestic_bias=2.5, tourism_weight=0.2, domestic_holiday=0.7),
+    "station_b":    dict(name="Riverside",      base=550, weekend_factor=0.7,  domestic_bias=2.0, tourism_weight=0.3, domestic_holiday=0.75),
+    "tourist_hub":  dict(name="Old Town",     base=350, weekend_factor=1.8,  domestic_bias=0.5, tourism_weight=1.0, domestic_holiday=1.8),
+    "bus_terminal": dict(name="Gateway Terminal",base=500, weekend_factor=0.8,  domestic_bias=1.2, tourism_weight=0.5, domestic_holiday=1.3),
 }
 
 
@@ -214,7 +214,7 @@ def generate():
 
 
 def self_check():
-    """Gulf share at the Tourist Hub must jump on a UAE holiday in peak summer vs an ordinary day."""
+    """Gulf share at Old Town must jump on a UAE holiday in peak summer vs an ordinary day."""
     hub = LOCATIONS["tourist_hub"]
     ae = list(PROFILES).index("AE")
     normal, _ = daily_mix(date(2024, 11, 12), set(), hub)
@@ -222,7 +222,7 @@ def self_check():
     assert surge[ae] > 2 * normal[ae], (surge[ae], normal[ae])
     assert demand > 1.0, demand
     assert abs(sum(p["base_share"] for p in PROFILES.values()) - 100) < 1e-9
-    print(f"Self-check OK: Tourist Hub Gulf share {normal[ae]:.1%} (Nov) -> {surge[ae]:.1%} (Eid, June), "
+    print(f"Self-check OK: Old Town Gulf share {normal[ae]:.1%} (Nov) -> {surge[ae]:.1%} (Eid, June), "
           f"volume x{demand:.2f}")
 
 

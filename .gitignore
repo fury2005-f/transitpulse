@@ -1,0 +1,12 @@
+# secrets
+.env
+
+# generated
+backend/.venv/
+backend/data/
+backend/logs/
+__pycache__/
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts
+*.tsbuildinfo
