@@ -133,6 +133,6 @@ export const fmtLongDate = (iso: string) => {
 export const countryWithArticle = (name: string) => (/^(United|UAE)/.test(name) ? `the ${name}` : name);
 export const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
 
-export const panel = "rounded-lg border border-line bg-surface";
+export const panel = "rounded-xl glass";
 export const disclosure =
   "w-fit cursor-pointer rounded text-sm font-semibold text-accent underline decoration-line underline-offset-4 outline-none hover:decoration-accent focus-visible:ring-2 focus-visible:ring-accent";

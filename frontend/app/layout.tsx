@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Literata, Overpass_Mono, Public_Sans } from "next/font/google";
+import { Inter, Literata, Overpass_Mono } from "next/font/google";
 import "./globals.css";
 
-const sans = Public_Sans({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const serif = Literata({ subsets: ["latin"], variable: "--font-serif", display: "swap" });
 const mono = Overpass_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 

@@ -77,33 +77,36 @@ export default function SituationHero({ forecasts, surges, surgesError }: {
   ].sort((a, b) => a.date.localeCompare(b.date));
 
   return (
-    <section id="today" className="scroll-mt-6 py-12 sm:py-16" aria-labelledby="today-heading">
+    <section id="today" className="scroll-mt-14 py-14 sm:py-20" aria-labelledby="today-heading">
       <div className="reveal">
-        <h1 id="today-heading" className="font-serif text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+        <p className="text-sm font-medium text-accent">Operations overview</p>
+        <h1 id="today-heading" className="mt-2 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
           {noYear(today)}
         </h1>
-        <p className="mt-2 text-lg text-ink-2">
-          About {about(todayTotal)} people are expected today across all four locations.
+        <p className="mt-3 text-lg text-ink-2">
+          About <span className="font-semibold text-ink">{about(todayTotal)}</span> people expected today across all four locations.
         </p>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {forecasts.map((f, i) => (
           <LocationCard key={f.location} forecast={f} index={i} />
         ))}
       </div>
 
       {items.length > 0 ? (
-        <div className="reveal mt-10" style={{ "--d": "400ms" } as React.CSSProperties}>
-          <h2 className="font-semibold">Needs attention this week</h2>
-          <ul className="mt-3 divide-y divide-line border-y border-line">
+        <div className="reveal mt-12" style={{ "--d": "400ms" } as React.CSSProperties}>
+          <h2 className="text-lg font-semibold">Needs attention this week</h2>
+          <ul className="mt-4 space-y-3">
             {items.map((item) => (
-              <li key={item.key} className="flex gap-4 py-3">
-                {item.icon === "over" ? (
-                  <OctagonAlert size={18} className="mt-0.5 shrink-0 text-critical" aria-label="Over limit" />
-                ) : (
-                  <Users size={18} className="mt-0.5 shrink-0 text-accent" aria-label="Visitor surge" />
-                )}
+              <li key={item.key} className={`flex gap-4 rounded-xl glass p-4 transition-colors duration-150 ${item.icon === "over" ? "hover:border-critical/30" : "hover:border-accent/30"}`}>
+                <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${item.icon === "over" ? "bg-critical-wash" : "bg-sunken"}`}>
+                  {item.icon === "over" ? (
+                    <OctagonAlert size={16} className="text-critical" aria-label="Over limit" />
+                  ) : (
+                    <Users size={16} className="text-accent" aria-label="Visitor surge" />
+                  )}
+                </span>
                 <div>
                   <p className="text-sm font-semibold">{item.headline}</p>
                   <p className="mt-0.5 text-sm text-ink-2">{item.detail}</p>
@@ -111,22 +114,22 @@ export default function SituationHero({ forecasts, surges, surgesError }: {
               </li>
             ))}
             {!surges && (
-              <li className="py-3 text-sm text-ink-2">
+              <li className="rounded-xl glass p-4 text-sm text-ink-2">
                 {surgesError ? `Visitor surges could not be checked: ${surgesError}` : "Checking for visitor surges…"}
               </li>
             )}
           </ul>
-          <details className="mt-4">
+          <details className="mt-5">
             <summary className={disclosure}>See every busy day at each location</summary>
             <CapacityTable forecasts={forecasts} />
           </details>
         </div>
       ) : surges ? (
-        <p className="reveal mt-8 text-ink-2" style={{ "--d": "400ms" } as React.CSSProperties}>
+        <p className="reveal mt-10 text-ink-2" style={{ "--d": "400ms" } as React.CSSProperties}>
           Nothing needs attention this week.
         </p>
       ) : !surgesError ? (
-        <p className="reveal mt-8 text-sm text-ink-2" style={{ "--d": "400ms" } as React.CSSProperties}>
+        <p className="reveal mt-10 text-sm text-ink-2" style={{ "--d": "400ms" } as React.CSSProperties}>
           Checking for visitor surges{"…"}
         </p>
       ) : null}
@@ -141,17 +144,17 @@ function LocationCard({ forecast, index }: { forecast: Forecast; index: number }
 
   return (
     <div
-      className={`reveal ${panel} flex flex-col p-4`}
-      style={{ "--d": `${index * 80 + 100}ms` } as React.CSSProperties}
+      className={`reveal-scale hover-lift ${panel} flex flex-col p-5`}
+      style={{ "--d": `${index * 100 + 100}ms` } as React.CSSProperties}
     >
-      <p className="text-sm font-semibold text-ink-2">{forecast.location_name}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums sm:text-3xl">
+      <p className="text-sm font-medium text-ink-2">{forecast.location_name}</p>
+      <p className="mt-3 text-3xl font-bold tabular-nums tracking-tight sm:text-4xl">
         <CountUp target={day.total_riders} />
       </p>
-      <p className="text-xs text-muted">people expected</p>
+      <p className="mt-0.5 text-xs text-muted">people expected</p>
       <CapBar pct={day.capacity_used_pct} status={s.status} />
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE[s.status]}`}>
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[s.status]}`}>
           {s.label}
         </span>
         {holiday && <span className="truncate text-xs text-ink-2">{holiday}</span>}
@@ -188,9 +191,9 @@ function CapBar({ pct, status }: { pct: number; status: Status }) {
   useEffect(() => { setMounted(true); }, []);
 
   return (
-    <div className="mt-3 h-2 overflow-hidden rounded-full bg-sunken" role="meter" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Capacity">
+    <div className="mt-4 h-2 overflow-hidden rounded-full bg-sunken" role="meter" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Capacity">
       <div
-        className={`h-full rounded-full transition-[width] duration-700 ease-out motion-reduce:transition-none ${STATUS_BAR[status]}`}
+        className={`h-full rounded-full transition-[width] duration-1000 ease-out motion-reduce:transition-none ${STATUS_BAR[status]}`}
         style={{ width: mounted ? `${Math.min(pct, 100)}%` : "0%" }}
       />
     </div>

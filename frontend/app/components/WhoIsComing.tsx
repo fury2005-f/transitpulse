@@ -16,7 +16,7 @@ export default function WhoIsComing({ forecast, day }: { forecast: Forecast; day
 
   return (
     <div className="mt-10">
-      <h3 className="font-semibold">Who is coming on {fmtLongDate(d.date).replace(/ \d{4}$/, "")}</h3>
+      <h3 className="text-lg font-semibold">Who is coming on {fmtLongDate(d.date).replace(/ \d{4}$/, "")}</h3>
       <p className="mt-1 max-w-prose text-ink-2">
         About {Math.round(local)}% will be local visitors from India. The largest international group is from{" "}
         {countryWithArticle(COUNTRY_NAMES[topCode])}, at {topPct.toFixed(1)}%.
@@ -24,12 +24,12 @@ export default function WhoIsComing({ forecast, day }: { forecast: Forecast; day
           ` It is a public holiday in ${holidayCount === 1 ? "one country" : `${holidayCount} countries`} (${holidayNames.join(", ")}).`}
       </p>
 
-      <ul className="mt-5 max-w-2xl space-y-2.5" aria-label="Visitors by home country">
+      <ul className="mt-6 max-w-2xl space-y-3" aria-label="Visitors by home country">
         {rows.map(([name, pct]) => (
           <li key={name} className="grid grid-cols-[7.5rem_1fr_3.25rem] items-center gap-3 text-sm sm:grid-cols-[9rem_1fr_3.5rem]">
-            <span className="truncate">{name}</span>
+            <span className="truncate font-medium">{name}</span>
             <span className="h-2.5 overflow-hidden rounded-full bg-sunken" aria-hidden>
-              <span className="block h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
+              <span className="block h-full rounded-full bg-accent transition-all duration-500" style={{ width: `${pct}%` }} />
             </span>
             <span className="text-right tabular-nums text-ink-2">{pct.toFixed(1)}%</span>
           </li>

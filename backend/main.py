@@ -99,3 +99,66 @@ def chat(req: ChatRequest):
 @app.get("/api/briefing")
 def get_briefing():
     return briefing.get_briefing()
+
+
+EXPLORABLE_TABLES = {
+    "ridership": {"label": "Ridership", "desc": "Hourly rider counts by location and nationality", "limit": 200},
+    "weather": {"label": "Weather", "desc": "Hourly temperature and rainfall", "limit": 200},
+    "holidays": {"label": "Holidays", "desc": "Public holidays by country", "limit": 500},
+    "nationality_profiles": {"label": "Nationality Profiles", "desc": "Visitor nationality profiles and service preferences", "limit": 50},
+    "capacity_limits": {"label": "Capacity Limits", "desc": "Daily capacity per location", "limit": 10},
+}
+
+
+@app.get("/api/data/tables")
+def data_tables():
+    from database import connect
+    from contextlib import closing
+    tables = []
+    with closing(connect()) as conn:
+        cur = conn.cursor()
+        for name, meta in EXPLORABLE_TABLES.items():
+            cur.execute(f"SELECT COUNT(*) FROM {name}")
+            count = cur.fetchone()[0]
+            tables.append({"id": name, **meta, "row_count": count})
+    return {"tables": tables, "today": TODAY.isoformat()}
+
+
+DATE_COLUMNS = {"ridership": "timestamp", "weather": "timestamp", "holidays": "date"}
+
+
+@app.get("/api/data/{table}")
+def data_rows(
+    table: str,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+):
+    if table not in EXPLORABLE_TABLES:
+        raise HTTPException(404, f"Unknown table: {table}")
+    from database import connect
+    from contextlib import closing
+
+    date_col = DATE_COLUMNS.get(table)
+    where = ""
+    params: list = []
+    if date_col and (date_from or date_to):
+        clauses = []
+        if date_from:
+            clauses.append(f"{date_col} >= ?")
+            params.append(date_from)
+        if date_to:
+            clauses.append(f"{date_col} < date(?, '+1 day')")
+            params.append(date_to)
+        where = " WHERE " + " AND ".join(clauses)
+
+    with closing(connect()) as conn:
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM {table}{where} LIMIT ? OFFSET ?", params + [limit, offset])
+        columns = [d[0] for d in cur.description]
+        rows = [list(r) for r in cur.fetchall()]
+        cur.execute(f"SELECT COUNT(*) FROM {table}{where}", params)
+        total = cur.fetchone()[0]
+    return {"table": table, "columns": columns, "rows": rows, "total": total, "offset": offset, "limit": limit}
+

@@ -27,7 +27,7 @@ export default function NationalityChart({ forecast }: { forecast: Forecast }) {
             ? "International visitors only, so the smaller groups are easier to compare."
             : "Every visitor, by home country. Holidays abroad change the mix."}
         </p>
-        <div role="group" aria-label="Visitors shown" className="inline-flex rounded-lg border border-line p-0.5 text-sm">
+        <div role="group" aria-label="Visitors shown" className="inline-flex rounded-xl glass p-0.5 text-sm">
           {([["Everyone", false], ["International only", true]] as const).map(([label, value]) => (
             <button
               key={label}
@@ -73,7 +73,7 @@ export default function NationalityChart({ forecast }: { forecast: Forecast }) {
                 if (!active || !payload?.length) return null;
                 const r = payload[0].payload as Row;
                 return (
-                  <div className="rounded-lg border border-line bg-surface px-3 py-2 text-sm shadow-sm tabular-nums">
+                  <div className="rounded-xl glass px-3 py-2 text-sm shadow-md tabular-nums">
                     <p className="font-semibold">{r.label}</p>
                     {r.holidays.length > 0 && <p className="max-w-56 text-ink-2">{r.holidays.join(", ")}</p>}
                     <ul className="mt-1 space-y-0.5">

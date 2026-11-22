@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BriefingSection from "./components/BriefingSection";
-import ChatPanel from "./components/ChatPanel";
+import { MessageSquare, Database } from "lucide-react";
 import Footer from "./components/Footer";
 import ForecastChart from "./components/ForecastChart";
 import LocationPicker from "./components/LocationPicker";
@@ -44,7 +44,7 @@ export default function Page() {
   return (
     <div className="min-h-screen">
       <TopBar />
-      <main className="mx-auto max-w-5xl px-4 sm:px-6">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         {dataError ? (
           <ApiProblem message={dataError} />
         ) : !forecasts || !actuals || !forecast || !selectedDay ? (
@@ -56,10 +56,26 @@ export default function Page() {
           <>
             <SituationHero forecasts={Object.values(forecasts)} surges={briefing?.facts.surges} surgesError={briefingError} />
             <BriefingSection briefing={briefing} error={briefingError} />
-            <ChatPanel />
 
-            <section id="forecast" className="scroll-mt-6 border-t border-line py-12" aria-labelledby="forecast-title">
-              <h2 id="forecast-title" className="font-serif text-2xl font-semibold sm:text-3xl">Explore the forecast</h2>
+            <div className="section-divide scroll-mt-14 py-14 flex flex-wrap gap-4">
+              <a
+                href="/chat"
+                className="hover-lift glass flex items-center gap-3 rounded-xl px-6 py-4 font-semibold outline-none transition-all duration-200 hover:!border-accent focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <MessageSquare size={20} className="text-accent" />
+                Ask the AI
+              </a>
+              <a
+                href="/data"
+                className="hover-lift glass flex items-center gap-3 rounded-xl px-6 py-4 font-semibold outline-none transition-all duration-200 hover:!border-accent focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <Database size={20} className="text-accent" />
+                Explore the data
+              </a>
+            </div>
+
+            <section id="forecast" className="section-divide scroll-mt-14 py-14" aria-labelledby="forecast-title">
+              <h2 id="forecast-title" className="text-2xl font-bold tracking-tight sm:text-3xl">Explore the forecast</h2>
               <p className="mt-2 max-w-prose text-ink-2">Pick a location and a day to see how busy it will be and who is coming.</p>
               <LocationPicker location={location} onSelect={setLocation} />
               <WeekStrip forecast={forecast} selected={selectedDay} onSelect={setDay} />

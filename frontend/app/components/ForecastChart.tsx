@@ -27,23 +27,23 @@ export default function ForecastChart({ forecast, actuals }: { forecast: Forecas
     <div className="mt-10">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
         <div className="max-w-prose">
-          <h3 className="font-semibold">People per day through the week</h3>
+          <h3 className="text-lg font-semibold">People per day through the week</h3>
           <p className="mt-1 text-sm text-ink-2">The red dashed line is the daily limit of {fmt(cap)} people.</p>
         </div>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
+        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl glass px-3 py-2 text-sm transition-colors duration-150">
           <input type="checkbox" checked={compare} onChange={(e) => setCompare(e.target.checked)} className="h-4 w-4 accent-accent" />
-          Compare with what actually happened
+          Compare with actuals
         </label>
       </div>
 
-      <div className={`${panel} mt-4 p-4`}>
+      <div className={`${panel} mt-5 p-5`}>
         {compare && (
-          <ul className="mb-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-2" aria-label="Legend">
+          <ul className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-2" aria-label="Legend">
             <LegendLine color={c.forecast} label="Forecast" />
             <LegendLine color={c.actual} label="What happened" />
           </ul>
         )}
-        <div className="h-64">
+        <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={rows} margin={{ top: 12, right: 12, bottom: 4, left: 0 }}>
               <CartesianGrid vertical={false} stroke={c.grid} />
@@ -63,7 +63,7 @@ export default function ForecastChart({ forecast, actuals }: { forecast: Forecas
                   if (!active || !payload?.length) return null;
                   const r = payload[0].payload as Row;
                   return (
-                    <div className="rounded-lg border border-line bg-surface px-3 py-2 text-sm shadow-sm tabular-nums">
+                    <div className="rounded-xl glass px-4 py-3 text-sm shadow-md tabular-nums">
                       <p className="font-semibold">{r.label}</p>
                       <p className="mt-1">About {fmt(r.forecast)} people expected</p>
                       {compare && r.actual !== null && <p>{fmt(r.actual)} actually came</p>}
