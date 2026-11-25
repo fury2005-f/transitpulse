@@ -86,21 +86,49 @@ def client() -> genai.Client:
     )
 
 
-_skip_main_until = 0.0
+# Each one was checked with a real tool call on this key; Google retires versions (2.5 now returns 404).
+MODELS = list(dict.fromkeys([MODEL, FALLBACK_MODEL, "gemini-3.5-flash", "gemini-3.5-flash-lite"]))
+CALL_BUDGET_S = 60  # stop trying further models after this, so one step can't run for minutes
+_cooling: dict[str, float] = {}  # model -> time it may be tried again
+_last_good: str | None = None
+
+
+def _skip_seconds(e: Exception) -> float | None:
+    """How long to skip a model after this error, or None if the error should not be hidden."""
+    code = getattr(e, "code", None)
+    if code == 404:
+        return 24 * 3600  # retired for this key; it won't come back in minutes
+    if isinstance(e, (genai_errors.ServerError, httpx.TimeoutException)) or code == 429:
+        return 300
+    return None
 
 
 def generate(contents, config=None):
-    """Call the main model; if it is overloaded or times out, use the fallback model (and keep using it
-    for 5 minutes, so the following steps don't wait on the overloaded model again)."""
-    global _skip_main_until
-    models = [MODEL, FALLBACK_MODEL] if time.time() >= _skip_main_until else [FALLBACK_MODEL]
-    for model in dict.fromkeys(models):
-        try:
-            return model, client().models.generate_content(model=model, contents=contents, config=config)
-        except (genai_errors.ServerError, httpx.TimeoutException):
-            if model == FALLBACK_MODEL:
-                raise
-            _skip_main_until = time.time() + 300
+    """Try the model that last answered first, then the rest of MODELS. A busy model gets one retry after
+    a short pause; a model that keeps failing is skipped for a while so later steps don't wait on it."""
+    global _last_good
+    start = time.time()
+    order = sorted(MODELS, key=lambda m: m != _last_good)
+    ready = [m for m in order if _cooling.get(m, 0) <= start] or order
+    last: Exception | None = None
+    for model in ready:
+        if last and time.time() - start > CALL_BUDGET_S:
+            break
+        for attempt in range(2):
+            try:
+                response = client().models.generate_content(model=model, contents=contents, config=config)
+                _last_good = model
+                return model, response
+            except Exception as e:
+                skip = _skip_seconds(e)
+                if skip is None:
+                    raise
+                last = e
+                if attempt == 1 or skip > 300 or time.time() - start > CALL_BUDGET_S:
+                    _cooling[model] = time.time() + skip
+                    break
+                time.sleep(1.5)
+    raise last
 
 
 def ask(question: str) -> dict:

@@ -5,6 +5,7 @@ import BriefingSection from "./components/BriefingSection";
 import { MessageSquare, Database } from "lucide-react";
 import Footer from "./components/Footer";
 import ForecastChart from "./components/ForecastChart";
+import GroupImpact from "./components/GroupImpact";
 import LocationPicker from "./components/LocationPicker";
 import SituationHero from "./components/SituationHero";
 import TopBar from "./components/TopBar";
@@ -56,6 +57,7 @@ export default function Page() {
           <>
             <SituationHero forecasts={Object.values(forecasts)} surges={briefing?.facts.surges} surgesError={briefingError} />
             <BriefingSection briefing={briefing} error={briefingError} />
+            <GroupImpact />
 
             <div className="section-divide scroll-mt-14 py-14 flex flex-wrap gap-4">
               <a

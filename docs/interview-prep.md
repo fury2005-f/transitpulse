@@ -9,9 +9,9 @@
 
 ### Q1: What does TransitPulse do?
 
-**Answer:** TransitPulse is an AI-powered operations dashboard for a tourism-heavy transit network. It forecasts hourly ridership at 4 locations — Central Station, Riverside, Old Town, and Gateway Terminal — using a LightGBM model trained on 2 years of synthetic data (842,112 ridership rows). It also runs a Gemini-powered AI agent that operations managers can ask questions in plain English, and it detects nationality surges when a country's public holiday drives extra visitors. The system writes a morning briefing automatically, checking every number Gemini produces against the source data before publishing it.
+**Answer:** TransitPulse is an AI-powered operations dashboard for a tourism-heavy transit network. It forecasts hourly ridership at 4 locations — Central Station, Riverside, Old Town, and Gateway Terminal — using a LightGBM model trained on 2 years of synthetic data (842,112 ridership rows). It also runs a Gemini-powered AI agent that operations managers can ask questions in plain English, and it detects nationality surges when a country's public holiday drives extra visitors. The system writes a morning briefing automatically, checking every number Gemini produces against the source data before publishing it. Finally, a Group Impact view carries the transport forecast through to the group's other businesses (loop bus, theme park, ropeway, hotel, retail), weighted by who is visiting.
 
-**Key phrase:** "AI operations agent that forecasts ridership, detects nationality surges, and writes verified morning briefings."
+**Key phrase:** "AI operations agent that forecasts ridership, detects nationality surges, writes verified morning briefings, and shows the knock-on demand across the whole group."
 
 ---
 
@@ -95,6 +95,7 @@ backend/
   evaluate.py          # MAPE evaluation on Oct-Dec 2025 holdout
   baseline.py          # Naive "same hour last week" baseline (1 function, 1 line)
   nationality.py       # Nationality mix forecasting, surge detection
+  cascade.py           # Group impact: transport forecast -> 5 downstream businesses
   agent/
     loop.py            # Gemini tool-calling agent loop (max 8 steps)
     tools.py           # 4 tools: get_forecast, get_actuals, run_sql, get_nationality_surge
@@ -102,6 +103,7 @@ backend/
     guardrails.py      # 4-layer SQL safety (text check, read-only, authorizer, limits)
   tests/
     test_guardrails.py # 20+ attack vectors, authorizer tests, row limit test
+    test_cascade.py    # Group impact: horizon, rate ordering, capacity maths
   model.txt            # Trained LightGBM model (Booster format)
   forecasts.csv        # Pre-scored forecast for the demo week
   ops.db               # SQLite database (34 MB)
@@ -111,7 +113,7 @@ frontend/
     chat/page.tsx      # Full-page AI chat interface
     data/page.tsx      # Data explorer with date filters
     lib.ts             # Types, shared constants, chart colors
-    components/        # 11 React components
+    components/        # 13 React components (incl. GroupImpact.tsx)
 ```
 
 **Key phrase:** "Clean separation: data gen -> DB -> features -> model -> agent -> API -> frontend."
@@ -340,6 +342,104 @@ Old Town is the tourist hub: `domestic_bias=0.5` means fewer Indians relative to
 
 ---
 
+## 4B. GROUP IMPACT (CROSS-SEGMENT CASCADE) QUESTIONS
+
+> This is the feature that is specific to Fujikyu. Lead with it in the demo.
+
+### Q1: What is the Group Impact view?
+
+**Answer:** It takes the transport forecast and shows what it means for the rest of the group's businesses on the same day: Loop Bus, Theme Park, Ropeway, Hotel, and Retail & F&B. It's one section on the dashboard (`GroupImpact.tsx`, heading "One crowd, every business") with a day picker, a source card for everyone arriving by train and bus, and five cards below it. Each card shows the expected volume, a capacity bar, and a Normal / Busy / Over limit pill. The day buttons show a red badge with how many businesses go over their limit that day, and the view opens on the worst day automatically.
+
+**Key phrase:** "The people on the train are the same people at the park, the hotel and the shop. This shows them as one chain."
+
+---
+
+### Q2: Why did you build it? Why is it relevant to Fujikyu?
+
+**Answer:** Fujikyu isn't a railway company that happens to own a park. It's a "tourism company with its own legs", with 35 group companies around Mt. Fuji: the Fujikyuko Line, Fujikyu buses, Fuji-Q Highland, the Kachi Kachi Ropeway, hotels and retail. They all serve the same visitor on the same day. Three things in their plans point at this gap:
+1. **ULTRA Q** in the REBOOT mid-term plan is a cross-organisational project to spread Fuji-Q-style entertainment across hotels, transport and facilities and to promote cross-selling. That only works if you can see the group as one system.
+2. **About 40 group companies send daily sales into Power BI**, and each one reports on its own. The Corporate Planning Group's goal is "data democratisation".
+3. **Fujiyama Connect** is meant to be the group-wide data hub. This view is what that data looks like once it's connected.
+
+Most forecasting tools stop at one business. This shows the ripple effect.
+
+**Key phrase:** "It's ULTRA Q as data: the group seen as one system, not 40 separate reports."
+
+---
+
+### Q3: How is it calculated?
+
+**Answer:** In `backend/cascade.py:cascade_for_day()`:
+1. Sum the forecast riders across all 4 transport locations for the day (`forecast_hours`).
+2. Blend the 4 locations' nationality mixes into one mix, weighted by each location's riders (`expected_mix`).
+3. Each business in `SEGMENTS` has a `rate_by_nat` table: the share of riders from each nationality who go on to that business. The business's rate for the day = Σ (nationality share × that nationality's rate).
+4. Volume = transport total × blended rate. Capacity % = volume ÷ that business's capacity.
+
+It's served by `GET /api/cascade`, which returns all 7 forecast days. It reuses the existing forecast and nationality functions, so there's no new model and no new table.
+
+**Key phrase:** "Transport forecast × nationality-weighted conversion rate = demand at each business."
+
+---
+
+### Q4: Why does nationality matter? Isn't it just "more riders = more of everything"?
+
+**Answer:** No, and that's the main point of the feature. A domestic commuter (IN) goes from the station to work: their Theme Park rate is 0.05. A Chinese visitor on holiday usually visits the park: 0.45. So the same number of arrivals produces very different demand downstream depending on who they are.
+
+Concrete example from the demo data: **Saturday 27 Dec has 12.4% fewer arrivals than Monday 22 Dec (26,111 vs 29,820)**, but Hotel check-ins go **up 1.3%** (998 vs 985) and the Ropeway only drops 1.4%. That's because the weekend crowd has more tourists and fewer commuters. A transport-only report would say "Saturday is quieter", but for the hotel it's busier.
+
+**Key phrase:** "Fewer people can still mean more hotel guests. Who is coming matters as much as how many."
+
+---
+
+### Q5: Walk me through the demo numbers.
+
+**Answer:**
+
+| | Mon 22 Dec (normal) | Thu 25 Dec (Christmas) |
+|---|---|---|
+| Arriving by train and bus | 29,820 | 37,834 |
+| Loop Bus (cap 9,000) | 7,061 (79%) | 9,886 (**110%**) |
+| Theme Park (cap 4,500) | 3,166 (70%) | 4,582 (**102%**) |
+| Ropeway (cap 2,600) | 2,033 (78%) | 3,000 (**115%**) |
+| Hotel (cap 1,300) | 985 (76%) | 1,516 (**117%**) |
+| Retail & F&B (cap 7,000) | 4,946 (71%) | 6,958 (99%, Busy) |
+
+On Christmas, 4 of the 5 businesses are over their limit. The transport cards in the top section only tell you the stations are busy; this view tells you the ropeway and the hotel will be the real bottlenecks.
+
+---
+
+### Q6: Where do the conversion rates and capacities come from?
+
+**Answer:** Be honest here: **they are assumptions I set by hand**, like the rest of the synthetic data. The rates follow common-sense ordering (commuters convert least, holidaying East Asian and Gulf visitors convert most). The capacities are tuned so a normal day sits at 70–80% and a holiday surge stands out. The test `test_tourist_mix_converts_more_than_commuters` locks in that ordering.
+
+With real data, every rate would be **learned, not assumed**: Fujiyama Connect bookings already link a rider to a bus ticket, a park ticket and a hotel stay, and Fuji-Q's face-recognition gates count park entries. Fit the rates per nationality and season from those records, then check them against the next month's actuals.
+
+**Key phrase:** "The method is real; the rates are placeholders. Fujiyama Connect data would learn them."
+
+---
+
+### Q7: Why not a full model per business?
+
+**Answer:** A separate model for each of 5 businesses would be 5× the training, evaluation and maintenance, and with synthetic data it would only be learning my own assumptions back. A conversion-rate layer on top of one good transport forecast is easy to explain, easy to audit (every number is riders × rate), and easy to swap for learned rates later. If one business needs more accuracy, give that one its own model then.
+
+**Key phrase:** "One good forecast plus transparent conversion rates beats five black boxes. Upgrade one business at a time."
+
+---
+
+### Q8: What are its limitations?
+
+**Answer:** (1) The rates are fixed. In reality they change with season and weather (rain sends people from the ropeway to the shops). (2) It treats all arrivals on a day as one pool. It doesn't model timing (a 9am arrival reaches the park at 10am and the hotel at 3pm), so it's daily, not hourly. (3) Overnight hotel guests partly overlap with the next day's arrivals, and that isn't de-duplicated. (4) The capacities are single numbers; a real park has per-attraction limits.
+
+**Key phrase:** "Daily, fixed rates, no timing. Next step: learned seasonal rates and hourly flow."
+
+---
+
+### Q9: The 30-second demo script
+
+> "Your 40 group companies each report their own numbers today. This view treats them as one chain. The top card is everyone arriving by train and bus. Below are the businesses those same people use next. On a normal Monday everything sits around 75%. On Christmas the stations are busy, but the real problem is here: the ropeway at 115% and the hotel at 117%. And because the split depends on who is visiting, Saturday has fewer arrivals than Monday but the hotel is actually busier. With Fujiyama Connect data, these rates would be learned instead of assumed."
+
+---
+
 ## 5. AI AGENT QUESTIONS
 
 ### Q1: How does the tool-calling loop work?
@@ -429,9 +529,23 @@ For the chat endpoint (not briefings), the system prompt rule #1 (`loop.py:57`) 
 
 ### Q7: What's the model fallback mechanism?
 
-**Answer:** `loop.py:generate()` (lines 92-103) tries `MODEL` (default: `gemini-flash-latest`) first. If it gets a `ServerError` (503, model overloaded) or `httpx.TimeoutException`, it sets `_skip_main_until = time.time() + 300` (skip the main model for 5 minutes) and tries `FALLBACK_MODEL` (`gemini-flash-lite-latest`). On subsequent calls within that 5-minute window, it goes straight to the fallback. This prevents every step in a multi-step tool loop from waiting 30 seconds on an overloaded model — the first timeout triggers the switch, and all following steps use the lighter model immediately.
+**Answer:** `loop.py:generate()` walks a chain of 4 models in `MODELS`: `gemini-flash-latest`, `gemini-flash-lite-latest`, `gemini-3.5-flash`, `gemini-3.5-flash-lite`. Each was checked with a real tool call on this API key. How it handles errors:
+- **Busy** (503, timeout, 429 rate limit): retry once after 1.5 s, because most free-tier spikes last only seconds. If it fails again, skip that model for 5 minutes (`_cooling`).
+- **Retired** (404, Google withdrew that version for new users): skip it for 24 hours, no retry, and move straight on.
+- **Anything else** (bad request, bad key): raise immediately. Real bugs are never hidden behind a fallback.
+- **Remembers what worked**: `_last_good` is tried first on the next step, so a multi-step tool loop doesn't keep waiting on a busy model.
+- **Time budget**: `CALL_BUDGET_S = 60` stops it from trying further models after 60 s, so one step can't run for minutes.
 
-**Key phrase:** "First 503 triggers 5-minute switch to fallback model. Prevents cascading timeouts in tool loops."
+If everything fails, `main.py` returns a plain-English message, not raw JSON. In development the Next.js proxy waits up to 120 s (`next.config.js: proxyTimeout`), because the default 30 s was cutting off multi-step answers.
+
+**Why it matters (real incidents while preparing):**
+1. "How should we prepare for christmas?" failed twice with a raw 503. The old code tried each of 2 models once, and both were overloaded.
+2. My first fix added `gemini-2.5-flash` because it appeared in the API's model list, but it returned **404 "no longer available to new users"**, and the code treated that as fatal. Lesson: a model in the list isn't proof it works. I then tested each model with a real tool call before choosing it.
+3. A slow answer hit the dev proxy's 30 s limit and showed "API not running".
+
+Now Christmas answers in about 40 s via a backup model while the main model is overloaded. `tests/test_model_fallback.py` covers the retry order, the 404 skip, last-good-first, real errors not being hidden, and the all-busy case.
+
+**Key phrase:** "Busy: retry then cool off. Retired: skip. Real errors: raise. Remember what worked, and cap the time."
 
 ---
 
@@ -539,9 +653,9 @@ Origins come from `CORS_ORIGINS` env var (comma-separated), defaulting to `http:
 
 ### Q1: What's the component structure?
 
-**Answer:** The main page (`page.tsx`) composes: `TopBar` (sticky nav with links to Today, Briefing, AI Chat, Data, Forecast) -> `SituationHero` (4 location cards with capacity bars, animated count-up numbers, alert pills) -> `BriefingSection` (AI-written morning briefing with nationality mix) -> two glass button links to `/chat` and `/data` -> `LocationPicker` (route-line station selector) -> `WeekStrip` (7 day cards) -> `WhoIsComing` (nationality bar chart via `NationalityChart`) -> `ForecastChart` (Recharts line chart with forecast vs actuals toggle). The `/chat` page is a standalone ChatGPT-style interface. The `/data` page is a data explorer with 5 table cards, date filter dropdowns (Year/Month/Day), and paginated table views.
+**Answer:** The main page (`page.tsx`) composes: `TopBar` (sticky nav with links to Today, Briefing, AI Chat, Data, Forecast) -> `SituationHero` (4 location cards with capacity bars, animated count-up numbers, alert pills) -> `BriefingSection` (AI-written morning briefing with nationality mix) -> `GroupImpact` (fetches `/api/cascade` on its own; day picker with over-limit badges, transport source card, 5 business cards with capacity bars; opens on the worst day) -> two glass button links to `/chat` and `/data` -> `LocationPicker` (route-line station selector) -> `WeekStrip` (7 day cards) -> `WhoIsComing` (nationality bar chart via `NationalityChart`) -> `ForecastChart` (Recharts line chart with forecast vs actuals toggle). The `/chat` page is a standalone ChatGPT-style interface. The `/data` page is a data explorer with 5 table cards, date filter dropdowns (Year/Month/Day), and paginated table views.
 
-**Key phrase:** "11 components, 3 pages. SituationHero -> Briefing -> AI links -> Forecast explorer."
+**Key phrase:** "13 components, 3 pages. SituationHero -> Briefing -> Group impact -> AI links -> Forecast explorer."
 
 ---
 
@@ -584,6 +698,8 @@ Applied to every card, table, input, and button via `lib.ts:panel = "rounded-xl 
 ### Q1: What's the biggest limitation?
 
 **Answer:** The data is synthetic. The `generate_data.py` model is deterministic (seeded with `random.seed(42)` and `np.random.default_rng(42)`), and the nationality distributions follow the profiles exactly. Real transit data would be messier: missing hours, sensor failures, special events not in the holiday calendar, and much more complex nationality patterns. The model's 8.1% MAPE on synthetic data would likely be higher on real data. I explicitly mark this throughout with "ALL DATA IS SYNTHETIC" comments in every file.
+
+The Group Impact conversion rates and business capacities are also hand-set assumptions, not learned values (see section 4B, Q6).
 
 **Key phrase:** "Synthetic data is cleaner than real data. Real MAPE would be higher."
 
@@ -695,7 +811,7 @@ Old Town's capacity is 15,000 (`database.py:67`), so 80% is 12,000.
 
 ### Q5: What is REST? How does this API follow REST principles?
 
-**Answer:** REST (Representational State Transfer) uses HTTP methods and URLs to represent resources. This API is RESTful: `GET /api/forecast?location=X` reads forecast data (no side effects), `GET /api/actuals?location=X&start=Y&end=Z` reads historical data, `POST /api/chat` sends a question (creates a new conversation turn), `GET /api/briefing` reads the daily briefing. Resources are nouns (forecast, actuals, briefing), not verbs. Query parameters filter resources. JSON is the data format. HTTP status codes communicate outcomes: 200 success, 400 bad request (`main.py:32` exception handler), 404 not found, 502/503/504 for Gemini errors (`main.py:93-96`).
+**Answer:** REST (Representational State Transfer) uses HTTP methods and URLs to represent resources. This API is RESTful: `GET /api/forecast?location=X` reads forecast data (no side effects), `GET /api/actuals?location=X&start=Y&end=Z` reads historical data, `POST /api/chat` sends a question (creates a new conversation turn), `GET /api/briefing` reads the daily briefing, `GET /api/cascade` reads the week's group impact. Resources are nouns (forecast, actuals, briefing), not verbs. Query parameters filter resources. JSON is the data format. HTTP status codes communicate outcomes: 200 success, 400 bad request (`main.py:32` exception handler), 404 not found, 502/503/504 for Gemini errors (`main.py:93-96`).
 
 ---
 
@@ -713,7 +829,7 @@ Old Town's capacity is 15,000 (`database.py:67`), so 80% is 12,000.
 
 ### Q8: How did you test this?
 
-**Answer:** Three levels: (1) **Unit tests** — `test_guardrails.py` has 20+ attack vectors testing the SQL safety layers, plus structural tests for the authorizer, read-only connection, timeout, row limits, and future data hiding. Run with `python -m pytest`. (2) **Model evaluation** — `evaluate.py` trains on pre-October data and reports MAPE by location and on holiday-only days, comparing against the naive baseline. (3) **Self-checks** — `generate_data.py:self_check()` validates that nationality surge ratios work correctly and base_shares sum to 100%. (4) **Manual testing** — the `/data` page lets me search by date and verify any number the AI produces against the raw data.
+**Answer:** Three levels: (1) **Unit tests** — `test_guardrails.py` has 20+ attack vectors testing the SQL safety layers, plus structural tests for the authorizer, read-only connection, timeout, row limits, and future data hiding. `test_cascade.py` checks the group impact covers all 7 days and 5 businesses, that no business gets more people than arrived, and that every foreign nationality converts to the park more than domestic commuters. `test_model_fallback.py` fakes overloaded Gemini models to check the fallback chain. 39 tests in total; run with `python -m pytest`. (2) **Model evaluation** — `evaluate.py` trains on pre-October data and reports MAPE by location and on holiday-only days, comparing against the naive baseline. (3) **Self-checks** — `generate_data.py:self_check()` validates that nationality surge ratios work correctly and base_shares sum to 100%. (4) **Manual testing** — the `/data` page lets me search by date and verify any number the AI produces against the raw data.
 
 ---
 
@@ -762,6 +878,13 @@ Old Town's capacity is 15,000 (`database.py:67`), so 80% is 12,000.
 | Domestic base share (IN) | 70% |
 | Highest holiday multiplier | AE, CN = 2.5x |
 | Attack vectors tested | 20+ |
+| Tests passing | 39 |
+| Gemini model chain | 4 models, 1 retry on busy, 404 skipped 24 h, 60 s budget |
+| Group impact businesses | 5 (Loop Bus, Theme Park, Ropeway, Hotel, Retail & F&B) |
+| Capacities: Bus / Park / Ropeway / Hotel / Retail | 9,000 / 4,500 / 2,600 / 1,300 / 7,000 |
+| Park conversion: domestic vs Chinese | 0.05 vs 0.45 |
+| Christmas: businesses over limit | 4 of 5 |
+| Sat vs Mon: arrivals / hotel | −12.4% / +1.3% |
 | Data date range | 1 Jan 2024 – 31 Dec 2025 |
 | Demo date (TODAY) | 22 Dec 2025 |
 | Test period | Oct – Dec 2025 |

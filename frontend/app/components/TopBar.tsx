@@ -1,6 +1,7 @@
 const LINKS = [
   ["#today", "Today"],
   ["#briefing", "Briefing"],
+  ["#group", "Group impact"],
   ["/chat", "AI Chat"],
   ["/data", "Data"],
   ["#forecast", "Forecast"],

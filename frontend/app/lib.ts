@@ -52,6 +52,17 @@ export type Briefing = {
   facts: { today_total_riders: number; today_mix_pct: Record<string, number>; surges: Surge[] };
 };
 
+export type Cascade = {
+  today: string;
+  days: {
+    date: string;
+    weekday: string;
+    transport_total: number;
+    transport_capacity: number;
+    segments: { id: string; name: string; volume: number; unit: string; capacity: number; capacity_pct: number }[];
+  }[];
+};
+
 export type ChatReply = {
   answer: string;
   sql: string[];

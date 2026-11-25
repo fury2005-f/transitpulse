@@ -80,6 +80,13 @@ def get_actuals(location: Location, start: date, end: date):
     }
 
 
+@app.get("/api/cascade")
+def get_cascade():
+    """How the week's transport forecast flows into the group's other businesses."""
+    from cascade import cascade_week
+    return {"today": TODAY.isoformat(), "days": cascade_week()}
+
+
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000)
 
@@ -90,7 +97,15 @@ def chat(req: ChatRequest):
         return loop.ask(req.question)
     except RuntimeError as e:
         raise HTTPException(503, str(e))
+    except genai_errors.ServerError:
+        raise HTTPException(503, "Every AI model is busy right now (Google's free tier is overloaded). "
+                                 "Try again in a minute. The dashboard, briefing and group impact still work.")
     except genai_errors.APIError as e:
+        if e.code == 429:
+            raise HTTPException(429, "The AI's free-tier rate limit was reached. Try again in a minute.")
+        if e.code == 404:
+            raise HTTPException(503, "None of the configured AI models is available to this API key. "
+                                     "Check MODELS in backend/agent/loop.py.")
         raise HTTPException(502, f"Gemini API error: {e}")
     except httpx.TimeoutException:
         raise HTTPException(504, "Gemini did not respond in time. Its servers are busy; try again in a minute.")
